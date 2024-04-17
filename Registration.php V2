@@ -1,0 +1,79 @@
+<?php
+
+// Start the session
+session_start();
+
+// Function to connect to the database
+function connectToDatabase() {
+    // Database connection parameters
+    $servername = "localhost";
+    $username = "root";
+    $password = "root";
+    $database = "zoodb"; // Change to the name of your database
+    $port = 8889; // MySQL port for MAMP
+
+    // Create a new MySQLi connection
+    $conn = new mysqli($servername, $username, $password, $database, $port);
+
+    // Check if the connection was successful
+    if ($conn->connect_error) {
+        // If connection fails, terminate with an error message
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    // Return the connection object
+    return $conn;
+}
+
+// Function to insert a customer into the database
+function insertCustomer($conn, $Firstname, $Surname, $DOB, $Email, $Addressline1, $Addressline2, $Mobile, $Postcode, $CityTown, $Username, $Password) {
+    // Construct the SQL query to insert a customer
+    $sql = "INSERT INTO customers (firstname, DOB, surname, emailaddress, addressline1, addressline2, mobile, postcode, citytown, username, password)
+            VALUES ('$Firstname', '$DOB', '$Surname', '$Email', '$Addressline1', '$Addressline2', $Mobile, '$Postcode', '$CityTown', '$Username', '$Password')";
+
+    // Execute the SQL query
+    if ($conn->query($sql) === TRUE) {
+        // If insertion is successful, get the ID of the inserted record
+        $userID = $conn->insert_id;
+        // Print success message with the user ID
+        echo "Registration successful! User ID: $userID";
+    } else {
+        // If insertion fails, print error message
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+// Check if the form was submitted via POST method
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Connect to the database
+    $conn = connectToDatabase();
+
+    // Retrieve form data
+    $Firstname = $_POST["firstname"];
+    $Surname = $_POST["surname"];
+    $DOB = date("Y-m-d", strtotime($_POST["dateofbirth"]));
+    $Email = $_POST["email"];
+    $Addressline1 = $_POST["address1"];
+    $Addressline2 = $_POST["address2"];
+    $Mobile = $_POST["mobile"];
+    $Postcode = $_POST["postcode"];
+    $CityTown = $_POST["city/town"];
+    $Username = $_POST["username"];
+    $Password = $_POST["password"];
+
+    // Insert the customer into the database
+    insertCustomer($conn, $Firstname, $Surname, $DOB, $Email, $Addressline1, $Addressline2, $Mobile, $Postcode, $CityTown, $Username, $Password);
+
+    // Close the database connection
+    $conn->close();
+}
+
+// Print the contents of the $_POST array (for debugging)
+print_r($_POST);
+echo '<pre>';
+
+// Print the contents of the $_SESSION array (for debugging)
+var_dump($_SESSION);
+echo '<pre>';
+
+?>
